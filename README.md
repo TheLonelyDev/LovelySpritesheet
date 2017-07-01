@@ -35,9 +35,9 @@ The end result will stay "pixelated" because we are limited to 1024x1024 images 
 --[[ Touch this ]]--
 local intShapes					=	25 ;
 local intShapesPerRow			=	5 ;
-local intBox					=	64 * 1.5 ;			--This equals to arrPolygon.intRadius * 2.5
+local intBox					=	64 * 2.5 ;			--This equals to arrPolygon.intRadius * 2.5
 local intBoxOffset				=	64 * 3 ;			--This equals to arrPolygon.intRadius * 3
-local intOffset 				=	64 * ( 6 / 4 ) ;	--This equals to arrPolygon.intRadius * ( 3 / 4 )
+local intOffset 				=	64 * ( 3 / 4 ) ;	--This equals to arrPolygon.intRadius * ( 3 / 4 )
 
 --[[ Do not touch this ]]--
 local intCurrent				=	0 ;
