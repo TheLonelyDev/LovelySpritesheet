@@ -1,15 +1,17 @@
 local Graphics 				=	love.graphics ;
+local Filesystem 			=	love.filesystem ;
 local pi, floor, sin, cos	=	math.pi, math.floor, math.sin, math.cos ;
 
 local rgbaI					=	{ 255, 255, 255, 255 } ;
-local rgbaBg 				=	{ 0, 0, 0, 0} ;
+local rgbaBg 				=	{ 255, 255, 255, 0} ;
 
 function love.load( )
 	--[[ Touch this ]]--
-	intShapes				=	25 ; -- Please take a number that is a second power of something, eg 10 ^ 2 = 100
+	intShapes				=	64 ; -- Please take a number that is a second power of something, eg 10 ^ 2 = 100
+	intPadding 				=	8 ; -- Number of pixels between each polygon or image. (intDiameter + intPadding = size of sprite)
 	arrPolygon 				=
 	{
-		intRadius			= 	64 , -- The radius of the circle
+		intDiameter			= 	120 , -- The diameter of the circle
 		intThickness 		= 	12 , -- Something between lower than the radius works best (according to my testing)
 	} ;
 
@@ -25,6 +27,10 @@ function love.load( )
 	love.window.setMode( 1024 * intAspectModifier, 1024 * intAspectModifier ) ;
 
 	--[[ Do not touch this ]]--
+	--[[ Correct input values from diameter to radius ]]
+	arrPolygon.intRadius	=	arrPolygon.intDiameter / 2 ;
+	intPadding = intPadding / 2 ;
+
 	arrPolygon.intRadius	=	arrPolygon.intRadius * intAspectModifier ;
 	arrPolygon.intThickness =	arrPolygon.intThickness * intAspectModifier ;
 
@@ -40,12 +46,14 @@ function love.load( )
 	intShapes 			=	intShapes - 1 ;
 
 	if ( boolImage ) then
+		nameBase = 'Export of logo (' .. intAspectModifier .. 'x aspect)' ;
+
 		Image 				=	Graphics.newImage( 'logo.png' ) ;
 
 		intRadius 			=	arrPolygon.intRadius / 1 ;
 
-		intImageWidth		=	intRadius * 1.5 ;
-		intImageHeight		=	intRadius * 1.5 --* ( Image:getHeight( ) / Image:getWidth( ) ) ;
+		intImageWidth		=	intRadius * 2 ;
+		intImageHeight		=	intRadius * 2 --* ( Image:getHeight( ) / Image:getWidth( ) ) ;
 
 		intImageXScale		=	intImageHeight / Image:getWidth( ) ;
 		intImageYScale		=	intImageWidth / Image:getHeight( ) ;
@@ -59,6 +67,8 @@ function love.load( )
 		i2, i3, i4, i5		=	i * 2, i * 3, i * 4, i * 5 ;
 		q 					= 	arrPolygon.intRadius * 1.5 ;
 	else
+		nameBase = 'Export of ' .. intShapes + 1 .. ' polygons with radius ' .. arrPolygon.intRadius .. ' and a thickness off ' .. arrPolygon.intThickness .. ' (' .. intAspectModifier .. 'x aspect)' ;
+
 		i 					=	arrPolygon.intRadius / 2 ;
 		i2, i3, i4, i5		=	i * 2, i * 3, i * 4, i * 5 ;
 		q 					= 	arrPolygon.intRadius * 1.5 ;
@@ -74,21 +84,18 @@ end
 function love.draw( )
 	if ( boolImage ) then
 		for i = 1, intShapes do
-			DrawImage( ( ( intImageWidth * 2 ) * ( floor( i % intRows ) ) ) + intImageWidth , ( ( intImageHeight * 2 ) * floor( i / intRows ) ) + intImageHeight, i ) ;
+			DrawImage( ( ( intImageWidth + intPadding * 2 ) * ( floor( i % intRows ) ) ) + intPadding, ( ( intImageHeight + intPadding * 2 ) * floor( i / intRows ) ) + intPadding, i ) ;
 		end
-
-		local gpScreeenshot 	= 	Graphics.newScreenshot( true ) ;
-
-		gpScreeenshot:encode( 'png', 'Image export of logo (' .. intAspectModifier .. 'x aspect).png' ) ;
 	else
 		for i = 1, intShapes do
-			DrawPolygon( ( ( arrPolygon.x * 1.5 ) * ( floor( i % intRows ) ) ) + arrPolygon.x , ( ( arrPolygon.y * 1.5 ) * floor( i / intRows ) ) + arrPolygon.y, i ) ;
+			DrawPolygon( ( ( arrPolygon.x + intPadding * 2 ) * ( floor( i % intRows ) ) ) + arrPolygon.x / 2 + intPadding, ( ( arrPolygon.y + intPadding * 2 ) * floor( i / intRows ) ) + arrPolygon.y / 2 + intPadding, i ) ;
 		end
-
-		local gpScreeenshot 	= 	Graphics.newScreenshot( true ) ;
-
-		gpScreeenshot:encode( 'png', 'Image export of ' .. intShapes + 1 .. ' polygons with radius ' .. arrPolygon.intRadius .. ' and a thickness off ' .. arrPolygon.intThickness .. ' (' .. intAspectModifier .. 'x aspect).png' ) ;
 	end
+
+	local gpScreeenshot 	= 	Graphics.newScreenshot( true ) ;
+	gpScreeenshot:encode( 'png', nameBase..' Image.png' ) ;
+
+	WriteConfig( ) ;
 
 	love.event.quit( 0 ) ;
 end
@@ -223,4 +230,20 @@ function Draw( x, y, intMaxAngle )
 
 	Graphics.polygon( 'line', x, y, x1, y1, x2 + i3, y2 + i2 ) ;
 	Graphics.polygon( 'fill', x, y, x1, y1, x2 + i3, y2 + i2 ) ;
+end
+
+--[[ Config writing, which makes reading and setting the progress bar easy by reading the config ]]--
+local luaConfigString = [[{diameter=%i,padding=%i,count=%i,size=%i}]] ;
+
+local jsonConfigString = [[{"diameter":%i,"padding":%i,"count":%i,"size":%i}]] ;
+
+function WriteConfig( )
+	Filesystem.write(
+		nameBase..' Lua.lua',
+		string.format( luaConfigString, arrPolygon.intDiameter, intPadding, intShapes + 1, 1024 * intAspectModifier )
+	) ;
+	Filesystem.write(
+		nameBase..' JSON.json',
+		string.format( jsonConfigString, arrPolygon.intDiameter, intPadding, intShapes + 1, 1024 * intAspectModifier )
+	) ;
 end
