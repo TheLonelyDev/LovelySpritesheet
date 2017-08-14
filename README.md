@@ -20,7 +20,7 @@ Inside the *love.load( )* function you will be able to find some parameters you 
 
 
 ### **Notes**
-The images still need some sort of editing before they are able to be used in a game due to their "black background". You can do this on various ways, one of my ways is by opening the generated image in eg Paint.Net then use the Magic Wand to select the black and then remove it. However, this method is not the best when using images as a shape as it will leave a black tray around the image, this can be combated by possibly setting *rgbaBg* to another RGB colour that matches eg the colour of the loading screen that will be used. For just polygons this can be combated by using Hue/Saturation in Paint.Net with lightness on 100. (Adjustments>Adjust Hue/Saturation; or Ctrl+Shift+U).
+This supports transparent backgrounds and transparent images. The generated images will have transparent background, and image transparency will show.
 
 The end result will stay "pixelated" because we are limited to 1024x1024 images on ROBLOX, there is nothing I can do about that.
 
@@ -29,7 +29,7 @@ The end result will stay "pixelated" because we are limited to 1024x1024 images 
 *The following examples are using an image with the dimension of **1024x1024**, most images that are bigger than this will be down scaled to this.*
 
 ### ROBLOX Example (Polygonal)
-	
+
 ```lua    
 --[[ Insert this in a localscript in an ImageLabel/ImageButton ]]--
 --[[ Touch this ]]--
@@ -47,7 +47,7 @@ local floor						=	math.floor ;
 script.Parent.ImageRectSize		=	vec2New( intBox, intBox ) ;
 
 while ( wait( .1 ) ) do
-script.Parent.ImageRectOffset=	vec2New( intOffset + ( ( intCurrent % intShapesPerRow ) * intBoxOffset ), intOffset + ( floor( intCurrent / intImagesPerRow ) * intBoxOffset ) ) ; 
+script.Parent.ImageRectOffset=	vec2New( intOffset + ( ( intCurrent % intShapesPerRow ) * intBoxOffset ), intOffset + ( floor( intCurrent / intImagesPerRow ) * intBoxOffset ) ) ;
 intCurrent 					=	( intCurrent >= intShapes ) and 0 or intCurrent + 1 ;
 end
 ```
@@ -72,7 +72,7 @@ local floor						=	math.floor ;
 script.Parent.ImageRectSize		=	vec2New( intBox, intBox ) ;
 
 while ( wait( .1 ) ) do
-script.Parent.ImageRectOffset=	vec2New( intOffset + ( ( intCurrent % intShapesPerRow ) * intBoxOffset ), intOffset + ( floor( intCurrent / intImagesPerRow ) * intBoxOffset ) ) ; 
+script.Parent.ImageRectOffset=	vec2New( intOffset + ( ( intCurrent % intShapesPerRow ) * intBoxOffset ), intOffset + ( floor( intCurrent / intImagesPerRow ) * intBoxOffset ) ) ;
 intCurrent 					=	( intCurrent >= intShapes ) and 0 or intCurrent + 1 ;
 end
 ```
