@@ -1,13 +1,13 @@
 local Graphics 				=	love.graphics ;
 local pi, floor, sin, cos	=	math.pi, math.floor, math.sin, math.cos ;
 
-local rgbaI					=	{ 255, 255, 255 } ;
-local rgbaBg 				=	{ 0, 0, 0 } ;
+local rgbaI					=	{ 255, 255, 255, 255 } ;
+local rgbaBg 				=	{ 0, 0, 0, 0} ;
 
 function love.load( )
 	--[[ Touch this ]]--
 	intShapes				=	25 ; -- Please take a number that is a second power of something, eg 10 ^ 2 = 100
-	arrPolygon 				= 
+	arrPolygon 				=
 	{
 		intRadius			= 	64 , -- The radius of the circle
 		intThickness 		= 	12 , -- Something between lower than the radius works best (according to my testing)
@@ -31,7 +31,7 @@ function love.load( )
 	intRows 				=  	math.sqrt( intShapes ) ;
 	arrPolygon.x 			=	arrPolygon.intRadius * 2 ;
 	arrPolygon.y 			=	arrPolygon.x ;
-	
+
 	love.filesystem.setIdentity( 'CircleSpritesheet' ) ;
 
 	Graphics.setBackgroundColor( rgbaBg ) ;
@@ -61,7 +61,7 @@ function love.load( )
 	else
 		i 					=	arrPolygon.intRadius / 2 ;
 		i2, i3, i4, i5		=	i * 2, i * 3, i * 4, i * 5 ;
-		q 					= 	arrPolygon.intRadius * 1.5 ;		
+		q 					= 	arrPolygon.intRadius * 1.5 ;
 	end
 end
 
@@ -74,18 +74,18 @@ end
 function love.draw( )
 	if ( boolImage ) then
 		for i = 1, intShapes do
-			DrawImage( ( ( intImageWidth * 2 ) * ( floor( i % intRows ) ) ) + intImageWidth , ( ( intImageHeight * 2 ) * floor( i / intRows ) ) + intImageHeight, i ) ;	
+			DrawImage( ( ( intImageWidth * 2 ) * ( floor( i % intRows ) ) ) + intImageWidth , ( ( intImageHeight * 2 ) * floor( i / intRows ) ) + intImageHeight, i ) ;
 		end
 
-		local gpScreeenshot 	= 	Graphics.newScreenshot( ) ;
+		local gpScreeenshot 	= 	Graphics.newScreenshot( true ) ;
 
-		gpScreeenshot:encode( 'png', 'Image export of logo (' .. intAspectModifier .. 'x aspect).png' ) ;	
+		gpScreeenshot:encode( 'png', 'Image export of logo (' .. intAspectModifier .. 'x aspect).png' ) ;
 	else
 		for i = 1, intShapes do
-			DrawPolygon( ( ( arrPolygon.x * 1.5 ) * ( floor( i % intRows ) ) ) + arrPolygon.x , ( ( arrPolygon.y * 1.5 ) * floor( i / intRows ) ) + arrPolygon.y, i ) ;	
+			DrawPolygon( ( ( arrPolygon.x * 1.5 ) * ( floor( i % intRows ) ) ) + arrPolygon.x , ( ( arrPolygon.y * 1.5 ) * floor( i / intRows ) ) + arrPolygon.y, i ) ;
 		end
 
-		local gpScreeenshot 	= 	Graphics.newScreenshot( ) ;
+		local gpScreeenshot 	= 	Graphics.newScreenshot( true ) ;
 
 		gpScreeenshot:encode( 'png', 'Image export of ' .. intShapes + 1 .. ' polygons with radius ' .. arrPolygon.intRadius .. ' and a thickness off ' .. arrPolygon.intThickness .. ' (' .. intAspectModifier .. 'x aspect).png' ) ;
 	end
@@ -116,29 +116,47 @@ function DrawPolygon( x, y, intVal )
 	--[[ Set the circle colour to white ]]--
 	Graphics.setColor( rgbaI ) ;
 
-	Graphics.circle( 'line', x, y, arrPolygon.intRadius, intPolygonSegments ) ;
+	SetDrawStencil( x, y, intMaxAngle ) ;
+
 	Graphics.circle( 'fill', x, y, arrPolygon.intRadius, intPolygonSegments ) ;
-
-	--[[ Set the inner circle colour to black so it looks like that we only have a ring ]]--
-	Graphics.setColor( rgbaBg ) ;
-
-	Graphics.circle( 'line', x, y, arrPolygon.intRadius - arrPolygon.intThickness, intInnerPolygonSegments ) ;
-	Graphics.circle( 'fill', x, y, arrPolygon.intRadius - arrPolygon.intThickness, intInnerPolygonSegments ) ;	
-
-	Draw( x, y, intMaxAngle ) ;
 end
 
 function  DrawImage( x, y, intVal )
 	local intMaxAngle 		= 	( pi2 * ( intVal / intShapes ) ) ;
 
+	SetDrawStencil( x, y, intMaxAngle );
+
 	Graphics.setColor( 255, 255, 255 ) ;
 	Graphics.draw( Image, x, y, nil, intImageXScale, intImageYScale ) ;
+end
 
-	Draw( x + i, y + i, intMaxAngle ) ;
+--[[ We use a stencil of what should be the background so that the image is not drawn where the background should be. ]]--
+--[[ We do this so that the alpha of the background is preserved. Drawing black would leave black areas in our output. ]]--
+function SetDrawStencil( x, y, intMaxAngle )
+	stencilX, stencilY, stencilIntMaxAngle = x, y, intMaxAngle ;
+	love.graphics.stencil( DrawStencil, "replace", 1 ) ;
+	love.graphics.setStencilTest( "less", 1 ) ;
+end
+
+function DrawStencil( )
+	local x, y, intMaxAngle = stencilX, stencilY, stencilIntMaxAngle ;
+	Graphics.push( "all" ) ;
+	Graphics.setColor( 255, 255, 255 ) ;
+	if ( not boolImage ) then
+		--[[ Set the inner circle colour to black so it looks like that we only have a ring ]]--
+
+		Graphics.circle( 'line', x, y, arrPolygon.intRadius - arrPolygon.intThickness, intInnerPolygonSegments ) ;
+		Graphics.circle( 'fill', x, y, arrPolygon.intRadius - arrPolygon.intThickness, intInnerPolygonSegments ) ;
+
+		Draw( x, y, intMaxAngle ) ;
+	else
+		Draw( x + i, y + i, intMaxAngle ) ;
+	end
+	Graphics.pop( ) ;
 end
 
 function Draw( x, y, intMaxAngle )
-	Graphics.setColor( rgbaBg ) ;
+	Graphics.setColor( 255, 255, 255 ) ;
 
 	local x1, y1 ;
 
@@ -150,15 +168,15 @@ function Draw( x, y, intMaxAngle )
 		x1 					= 	q * cos( intMaxAngle - pih ) + x ;
 		y1 					= 	q * sin( intMaxAngle - pih ) + y ;
 
-		Graphics.polygon( 'line', x, y, x1, y1, x2, y2 - i ) ;			
+		Graphics.polygon( 'line', x, y, x1, y1, x2, y2 - i ) ;
 		Graphics.polygon( 'fill', x, y, x1, y1, x2, y2 - i ) ;
 
 		return ;
 	end
-	
+
 	x1 						= 	q * cos( r3 - pih ) + x ;
 	y1 						= 	q * sin( r3 - pih ) + y ;
-	
+
 	Graphics.polygon( 'line', x, y, x1, y1, x2, y2 - i  ) ;
 	Graphics.polygon( 'fill', x, y, x1, y1, x2, y2 - i  ) ;
 
@@ -166,8 +184,8 @@ function Draw( x, y, intMaxAngle )
 	--[[ Generate the lower left triangle ]]--
 	if ( intMaxAngle > r2 ) then
 		x1 					= 	q * cos( intMaxAngle - pih ) + x ;
-		y1 					= 	q * sin( intMaxAngle - pih ) + y ;	
-	
+		y1 					= 	q * sin( intMaxAngle - pih ) + y ;
+
 		Graphics.polygon( 'line', x, y, x1 , y1, x2 - i3, y2 + i2 ) ;
 		Graphics.polygon( 'fill', x, y, x1 , y1, x2 - i3, y2 + i2 ) ;
 
@@ -175,7 +193,7 @@ function Draw( x, y, intMaxAngle )
 	end
 
 	x1 						= 	q * cos( r2 - pih ) + x ;
-	y1 						= 	q * sin( r2 - pih ) + y ;	
+	y1 						= 	q * sin( r2 - pih ) + y ;
 
 	Graphics.polygon( 'line', x, y, x1 , y1, x2 - i3, y2 + i2 ) ;
 	Graphics.polygon( 'fill', x, y, x1 , y1, x2 - i3, y2 + i2 ) ;
@@ -184,7 +202,7 @@ function Draw( x, y, intMaxAngle )
 	--[[ Generate the lower right triangle ]]--
 	if ( intMaxAngle > r1 ) then
 		x1 					= 	q * cos( intMaxAngle - pih ) + x ;
-		y1 					= 	q * sin( intMaxAngle - pih ) + y ;	
+		y1 					= 	q * sin( intMaxAngle - pih ) + y ;
 
 		Graphics.polygon( 'line', x, y, x1, y1, x2, y2 + i5 ) ;
 		Graphics.polygon( 'fill', x, y, x1, y1, x2, y2 + i5 ) ;
@@ -193,16 +211,16 @@ function Draw( x, y, intMaxAngle )
 	end
 
 	x1 						= 	q * cos( r1 - pih ) + x ;
-	y1 						= 	q * sin( r1 - pih ) + y ;	
-	
+	y1 						= 	q * sin( r1 - pih ) + y ;
+
 	Graphics.polygon( 'line', x, y, x1, y1, x2, y2 + i5 ) ;
 	Graphics.polygon( 'fill', x, y, x1, y1, x2, y2 + i5 ) ;
 
 
 	--[[ Generate the upper right triangle ]]--
 	x1 						= 	q * cos( intMaxAngle - pih ) + x ;
-	y1 						= 	q * sin( intMaxAngle - pih ) + y ;	
-	
+	y1 						= 	q * sin( intMaxAngle - pih ) + y ;
+
 	Graphics.polygon( 'line', x, y, x1, y1, x2 + i3, y2 + i2 ) ;
 	Graphics.polygon( 'fill', x, y, x1, y1, x2 + i3, y2 + i2 ) ;
 end
