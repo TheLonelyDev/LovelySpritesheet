@@ -40,13 +40,10 @@ function love.load( )
 
 	love.filesystem.setIdentity( 'CircleSpritesheet' ) ;
 
-	Canvas = Graphics.newCanvas( 1024 * intAspectModifier, 1024 * intAspectModifier, "rgba8", 8 ) ;
+	Canvas = Graphics.newCanvas( 1024 * intAspectModifier, 1024 * intAspectModifier, "rgba8", 16 ) ;
 
 	Graphics.setBackgroundColor( rgbaBg ) ;
 	Graphics.setColor( rgbaI ) ;
-
-	Graphics.setCanvas( Canvas ) ;
-	Graphics.setBackgroundColor( rgbaBg ) ;
 
 	intShapes 			=	intShapes - 1 ;
 
@@ -82,11 +79,14 @@ end
 
 --[[ Using this for smoother drawing ]]--
 function love.conf( t )
-    t.window.fsaa 			= 	8 ;
+    t.window.msaa 			= 	16 ;
 end
 
 --[[ Do not touch ]]--
 function love.draw( )
+	Graphics.setCanvas( Canvas ) ;
+	Graphics.setBackgroundColor( rgbaBg ) ;
+
 	if ( boolImage ) then
 		for i = 1, intShapes do
 			DrawImage( ( ( intImageWidth + intPadding * 2 ) * ( floor( i % intRows ) ) ) + intPadding, ( ( intImageHeight + intPadding * 2 ) * floor( i / intRows ) ) + intPadding, i ) ;
