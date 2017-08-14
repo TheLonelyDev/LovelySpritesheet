@@ -23,7 +23,7 @@ Inside the *love.load( )* function you will be able to find some parameters you 
 ### **Notes**
 This supports transparent backgrounds and transparent images. The generated images will have transparent backgrounds, and image transparency will show.
 
-The end result will stay "pixelated" because we are limited to 1024x1024 images on ROBLOX, there is nothing I can do about that.
+This uses anti-aliasing to keep edges smooth, but the end result will stay "pixelated" because we are limited to 1024x1024 images on ROBLOX.
 
 ----------
 
