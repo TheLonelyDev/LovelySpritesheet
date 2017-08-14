@@ -40,8 +40,13 @@ function love.load( )
 
 	love.filesystem.setIdentity( 'CircleSpritesheet' ) ;
 
+	Canvas = Graphics.newCanvas( 1024 * intAspectModifier, 1024 * intAspectModifier, "rgba8", 8 ) ;
+
 	Graphics.setBackgroundColor( rgbaBg ) ;
 	Graphics.setColor( rgbaI ) ;
+
+	Graphics.setCanvas( Canvas ) ;
+	Graphics.setBackgroundColor( rgbaBg ) ;
 
 	intShapes 			=	intShapes - 1 ;
 
@@ -91,6 +96,9 @@ function love.draw( )
 			DrawPolygon( ( ( arrPolygon.x + intPadding * 2 ) * ( floor( i % intRows ) ) ) + arrPolygon.x / 2 + intPadding, ( ( arrPolygon.y + intPadding * 2 ) * floor( i / intRows ) ) + arrPolygon.y / 2 + intPadding, i ) ;
 		end
 	end
+
+	Graphics.setCanvas( ) ;
+	Graphics.draw( Canvas );
 
 	local gpScreeenshot 	= 	Graphics.newScreenshot( true ) ;
 	gpScreeenshot:encode( 'png', nameBase..' Image.png' ) ;
