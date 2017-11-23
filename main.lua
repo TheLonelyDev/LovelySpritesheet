@@ -3,7 +3,7 @@ local Filesystem 			=	love.filesystem ;
 local pi, floor, sin, cos	=	math.pi, math.floor, math.sin, math.cos ;
 
 local rgbaI					=	{ 255, 255, 255, 255 } ;
-local rgbaBg 				=	{ 255, 255, 255, 0} ;
+local rgbaBg 				=	{ 255, 255, 255, 0 } ;
 
 function love.load( )
 	--[[ Touch this ]]--
@@ -18,7 +18,10 @@ function love.load( )
 	intPolygonSegments		=	360 ; -- Amount of segments, this can be anywhere from 3 to math.huge (AFAIK)
 	intInnerPolygonSegments	=	360 ; -- Usually the same as intCircleSegments
 
-	boolImage				=	true ; -- If set to true it will use the image logo.png inside the directory instead of drawing polygons. (This is only tested with square images eg 64x64 and not 64x32). This will also override some settings from above.
+	boolImage				=	false ; -- If set to true it will use the image logo.png inside the directory instead of drawing polygons. (This is only tested with square images eg 64x64 and not 64x32). This will also override some settings from above.
+
+	boolClockwise 			=	true ; -- If set to false this will make an inverted image etc
+
 
 	--[[ Note: yes, you can make a triangle loading bar, or hexagonal, go crazy :) ]]--
 
@@ -88,11 +91,11 @@ function love.draw( )
 	Graphics.setBackgroundColor( rgbaBg ) ;
 
 	if ( boolImage ) then
-		for i = 1, intShapes do
+		for i = 0, intShapes do
 			DrawImage( ( ( intImageWidth + intPadding * 2 ) * ( floor( i % intRows ) ) ) + intPadding, ( ( intImageHeight + intPadding * 2 ) * floor( i / intRows ) ) + intPadding, i ) ;
 		end
 	else
-		for i = 1, intShapes do
+		for i = 0, intShapes do
 			DrawPolygon( ( ( arrPolygon.x + intPadding * 2 ) * ( floor( i % intRows ) ) ) + arrPolygon.x / 2 + intPadding, ( ( arrPolygon.y + intPadding * 2 ) * floor( i / intRows ) ) + arrPolygon.y / 2 + intPadding, i ) ;
 		end
 	end
@@ -109,13 +112,11 @@ function love.draw( )
 end
 
 
-local r1, r2, r3 			=	math.rad( 90 ), math.rad( 180 ), math.rad( 270 ) ;
+local r1, r2, r3, r4		=	math.rad( 90 ), math.rad( 180 ), math.rad( 270 ), math.rad( 360 ) ;
 local pih 					=	pi / 2 ;
 local pi2					=	2 * pi ;
 
 function DrawPolygon( x, y, intVal )
-	local intMaxAngle 		= 	( pi2 * ( intVal / intShapes ) ) ;
-
 	--[[ Old drawing method ahead, this is not very recommended.
 
 	for i = 0, intMaxAngle, .01 do
@@ -131,15 +132,21 @@ function DrawPolygon( x, y, intVal )
 	--[[ Set the circle colour to white ]]--
 	Graphics.setColor( rgbaI ) ;
 
-	SetDrawStencil( x, y, intMaxAngle ) ;
+	if ( not boolClockwise ) then
+		SetDrawStencil( x, y, r4 - ( pi2 * ( intVal / intShapes ) ) ) ;
+	else
+		SetDrawStencil( x, y, ( pi2 * ( intVal / intShapes ) ) ) ;
+	end
 
 	Graphics.circle( 'fill', x, y, arrPolygon.intRadius, intPolygonSegments ) ;
 end
 
 function  DrawImage( x, y, intVal )
-	local intMaxAngle 		= 	( pi2 * ( intVal / intShapes ) ) ;
-
-	SetDrawStencil( x, y, intMaxAngle );
+	if ( not boolClockwise ) then
+		SetDrawStencil( x, y, r4 - ( pi2 * ( intVal / intShapes ) ) ) ;
+	else
+		SetDrawStencil( x, y, ( pi2 * ( intVal / intShapes ) ) ) ;
+	end
 
 	Graphics.setColor( 255, 255, 255 ) ;
 	Graphics.draw( Image, x, y, nil, intImageXScale, intImageYScale ) ;
@@ -157,6 +164,7 @@ function DrawStencil( )
 	local x, y, intMaxAngle = stencilX, stencilY, stencilIntMaxAngle ;
 	Graphics.push( "all" ) ;
 	Graphics.setColor( 255, 255, 255 ) ;
+
 	if ( not boolImage ) then
 		--[[ Set the inner circle colour to black so it looks like that we only have a ring ]]--
 
