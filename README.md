@@ -17,6 +17,7 @@ Inside the *love.load( )* function you will be able to find some parameters you 
  - *intPolygonSegments* is the amount of "segments" used to draw the polygons, it is advised to set this higher than 3 and lower than *math.huge( )*. I often use 360 for the best resulsts.
  - *intInnerPolygonSegments* usually the same as *intPolygonSegments*, will be deprecated in future releases.
  - *boolImage* if this is TRUE then the script will check for an image named logo.png inside the folder where the main.lua script is located. This image will then be used as a base/shape instead of making polygons.
+  - *boolClockwise* if this is TRUE then the script will check start the "revealing" the image clockwise, FALSE for anti-clockwise.
  - *intAspectModifier* this integer can be set up "upscale" the result. Keep in mind that this modifier will multiply to the default **1024x1024** so an *intAspectModifier* of 2 makes the end result 2048x2048. This can be used to get slightly better results if editing afterwards. Note that the generated config files will follow this value and are not automatically scaled down to 1024x1024. You may need to tweak their values after uploading to Roblox.
 
 
